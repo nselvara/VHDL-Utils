@@ -1,161 +1,62 @@
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-# Project name
+# VHDL-Utils
 
-Describe your project
+A collection of reusable VHDL utilities, components, and testbenches to accelerate hardware design workflows. This repository provides tested, reliable building blocks for digital design projects with comprehensive simulation support.
 
-The VHDL codes are tested with [VUnit framework's](https://vunit.github.io/) checks, [OSVVM](https://osvvm.org/) random features and simulated with [EDA Playground](https://www.edaplayground.com/) and/or [ModelSim](https://en.wikipedia.org/wiki/ModelSim).
+The utilities are designed to work with VHDL-2008 simulators and include support for [VUnit framework](https://vunit.github.io/) and [OSVVM](https://osvvm.org/) for enhanced testing capabilities.
 
-## Minimum System Requirements
+## Requirements
 
-- **OS**: (Anything that can run the following)
-  * **IDE**:
-    - [`VSCode latest`](https://code.visualstudio.com/download) with following plugins:
-      - [`Python`](https://marketplace.visualstudio.com/items?itemName=ms-python.python) by Microsoft
-      - [`Pylance`](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance) by Microsoft
-      - [`Draw.io`](https://marketplace.visualstudio.com/items?itemName=hediet.vscode-drawio) by Henning Dieterichs
-      - [`Draw.io Integration: WaveDrom plugin`](https://marketplace.visualstudio.com/items?itemName=nopeslide.vscode-drawio-plugin-wavedrom) by nopeslide
-      - [`TerosHDL`](https://marketplace.visualstudio.com/items?itemName=teros-technology.teroshdl) by Teros Technology
-      - [`VHDL-LS`](https://marketplace.visualstudio.com/items?itemName=hbohlin.vhdl-ls) by Henrik Bohlin (Deactivate the one provided by TerosHDL)
-  * **VHDL Simulator**: (Anything that supports **VHDL-2008**)
-  * **Script execution environment**:
-    - `Python 3.11.4` to automatise testing via **VUnit**
+- **VHDL Simulator**: Any simulator that supports **VHDL-2008**
+- **IDE** (Optional but recommended):
+  - [`VSCode latest`](https://code.visualstudio.com/download) with VHDL language support:
+    - [`TerosHDL`](https://marketplace.visualstudio.com/items?itemName=teros-technology.teroshdl) by Teros Technology
+    - [`VHDL-LS`](https://marketplace.visualstudio.com/items?itemName=hbohlin.vhdl-ls) by Henrik Bohlin
+- **Python 3.11+** (Optional): For VUnit-based simulation automation
 
 ## Initial Setup
 
 ### Clone repository
 
 - Open terminal
-- Run `git clone git@github.com:nselvara/eda_playground_mre.git`
-- Run `cd eda_playground_mre`
+- Run `git clone git@github.com:nselvara/VHDL-Utils.git`
+- Run `cd VHDL-Utils`
 - Run `code .` to open VSCode in the current directory
 
-### Create Virtual Environment in VSCode
+## Available Components
 
-#### Via GUI
+This repository includes the following VHDL utilities and components:
 
-- Open VSCode
-- Press `CTRL + Shift + P`
-- Search for `Python: Create Environment` command
-- Select `Venv`
-- Select the latest Python version
-- Select [`requirements.txt`](./ip/requirements.txt) file
-- Wait till it creates and activates it automatically
+### Core VHDL Utilities (`utils_pkg.vhd`)
+- **Bit calculation functions**: `to_bits()` - Calculate minimum bits needed to represent a number
+- **Boolean conversion**: `??` operator - Convert boolean to std_ulogic  
+- **Vector operations**: `**` operator - Create UNRESOLVED_UNSIGNED vectors
+- **File operations**: `file_length_in_characters()` - Get file size in characters
+- **Signal analysis**: `get_amount_of_state()` - Count occurrences of specific states in vectors
 
-#### Via Terminal
+### Testbench Utilities (`tb_utils.vhd`)
+- **Clock generation**: 
+  - `generate_clock()` - Basic clock generation with frequency control
+  - `generate_clock()` with reset - Clock generation with reset synchronization
+  - `generate_derived_clock()` - Derived clock generation with division factors
+- **Reset patterns**: Predefined weight distributions for realistic reset scenarios
+- **Random signal generation**: 50/50 weight distributions for balanced testing
 
-- Open VSCode
-- Press `CTRL + J` if it's **Windows** or ``CTRL+` `` for **Linux** to open the terminal
-- Run `python -m venv .venv` in Windows Terminal (CMD) or `python3 -m venv .venv` in Linux Terminal
-- Run `.\.venv\Scripts\activate` on Windows or `source .venv/bin/activate` on Linux
-- Run `pip install -r requirements.txt` to install all of the dependencies
-- Click on `Yes` when the prompt appears in the right bottom corner
+### Simulation Support
+- **VUnit integration** (`run_all_testbenches_lib.py`): Python library for automated testbench execution
+- **Xilinx library support**: Automatic glbl module handling for Xilinx simulations  
+- **Wave file automation** (`find_wave_file.do`): ModelSim script for automatic wave file loading
 
-#### Additonal Info
+## Usage
 
-For more info see page: [Python environments in VS Code](https://code.visualstudio.com/docs/python/environments)
+To use these utilities in your VHDL projects:
 
-## Running simulation
-
-### Option 1: EDA Playground (Web-Based)
-
-You can simulate this project on [EDA Playground](https://www.edaplayground.com/) without installing anything locally. Use the following settings:
-
-- **Testbench + Design**: `VHDL`
-- **Top entity**: `tb_test_entity` (or whatever your testbench entity is called)
-- ✅ **Enable `VUnit`** (required to use VUnit checks like `check_equal`)
-
-> [!WARNING]
-> Enabling **VUnit** will automatically create a `testbench.py` file.  
-> **Do not delete this file**, as it is required for:
-> - Initializing the VUnit test runner
-> - Loading `vunit_lib` correctly
-> - Enabling procedures such as `check_equal`, `check_true`, etc.
-
-> [!WARNING]
-> However, EDA Playground will **not create any VHDL testbench** for you.  
-> Therefore, you need to **manually create your own VHDL testbench file**:
-> - Click the ➕ symbol next to the file list
-> - Name it `tb.vhd` (or your own testbench name)
-> - Paste your testbench VHDL code into it
-
-- ✅ Select `OSVVM` under Libraries if your testbench uses OSVVM features
-- **Tools & Simulators**: `Aldec Riviera Pro 2022.04` or newer
-- **Compile Options**: `-2008`
-- ✅ Check `Open EPWave after run`
-- ✅ Check `Use run.do Tcl file` or `Use run.bash shell script` for more control (optional)
-
-These settings ensure compatibility with your VUnit-based testbenches and allow waveform viewing through EPWave.
-
-### Option 2: Local ModelSim/QuestaSim
-
-#### Environment variables
-
-Make sure the environment variable for ModelSim or QuestaSim is set, if not:
-
-**_:memo:_**: Don't forget to write the correct path to the ModelSim/QuestaSim folder
-
-##### Linux
-
-Open terminal and run either of the following commands:
-
-```bash
-echo "export VUNIT_MODELSIM_PATH=/opt/modelsim/modelsim_dlx/linuxpe" >> ~/.bashrc
-# $questa_fe is the path to the folder where QuestaSim is installed
-echo "export VUNIT_MODELSIM_PATH=\"$questa_fe/21.4/questa_fe/win64/\"" >> ~/.bashrc
-```
-
-Then restart the terminal or run `source ~/.bashrc` command.
-
-#### Windows
-
-Open PowerShell and run either of the following commands:
-
-```bat
-setx /m VUNIT_MODELSIM_PATH C:\modelsim_dlx64_2020.4\win64pe\
-setx /m VUNIT_MODELSIM_PATH C:\intelFPGA_pro\21.4\questa_fe\win64\
-```
-
-### Run Simulation Locally
-
-This project uses **VUnit** for automated VHDL testbench simulation.  
-The script [`test_runner.py`](ip/test_runner.py) acts as a wrapper, so you don’t need to deal with VUnit internals.
-
-### Run Simulation Locally
-
-This project uses **VUnit** for automated VHDL testbench simulation.  
-The script [`test_runner.py`](ip/test_runner.py) acts as a wrapper, so you don’t need to deal with VUnit internals.
-
-#### ⚙️ How to Run
-
-1. **Open VSCode** (or any editor/terminal).
-2. To run **all testbenches**, simply execute:
-
-   ```bash
-   ./.venv/Scripts/python.exe ./ip/test_runner.py
+1. Include the relevant package files in your project
+2. Add the appropriate `use` statements in your VHDL files:
+   ```vhdl
+   library work;
+   use work.utils_pkg.all;     -- For general utilities
+   use work.tb_utils.all;      -- For testbench utilities
    ```
-
-##### What the script does
-
-- Uses `run_all_testbenches_lib` internally.
-  - This hides the VUnit implementation
-- Looks for testbenches in the `./ip/` folder.
-- Runs all files matching `tb_*.vhd` (recursive pattern `**`).
-- GUI can be enabled via `gui=True` in `test_runner.py`.
-
-##### Optional Customization
-You can change the following arguments in `test_runner.py`:
-
-```python
-run_all_testbenches_lib(
-    path="./ip/",                 # Path where the HDL & tb files are located
-    tb_pattern="**",              # Match all testbenches
-    timeout_ms=1.0,               # Timeout in milliseconds
-    gui=False,                    # Set to True to open ModelSim/QuestaSim GUI
-    compile_only=False,           # Only compile, don’t run simulations
-    clean=False,                  # Clean before building
-    debug=False,                  # Enable debug logging
-    use_xilinx_libs=False,        # Add Xilinx simulation libraries
-    use_intel_altera_libs=False   # Add Intel/Altera simulation libraries
-)
-```
+3. For VUnit-based testing, use the provided Python library to automate simulation runs

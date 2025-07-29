@@ -36,3 +36,5 @@
 
 #VUnit
 vunit_out
+__pycache__/*
+__pycache__/
