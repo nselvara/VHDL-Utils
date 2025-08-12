@@ -1,10 +1,10 @@
---! 
+--!
 --! @author:    N. Selvarajah
---! @brief:     This pkg contains utility functions and constants used in the project.
---! @details:   
+--! @brief:     Describes utility functions and constants used in the project.
+--! @details:
 --!
 --! @license    This project is released under the terms of the MIT License. See LICENSE for more details.
---! 
+--!
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -53,6 +53,14 @@ package utils_pkg is
     ------------------------------------------------------------
     function get_amount_of_trailing_state(data: std_ulogic_vector; state: std_ulogic) return unsigned;
     function get_amount_of_trailing_state(data: std_ulogic_vector; state: std_ulogic) return natural;
+
+    ------------------------------------------------------------
+    -- Functions to get the lowest and highest active bit in a std_ulogic_vector
+    -- usage: get_lowest_active_bit(data);
+    -- usage: get_highest_active_bit(data);
+    ------------------------------------------------------------
+    function get_lowest_active_bit(data: std_ulogic_vector) return natural;
+    function get_highest_active_bit(data: std_ulogic_vector) return natural;
 
     ------------------------------------------------------------
     -- Function to check if a std_ulogic_vector is one state
@@ -158,6 +166,26 @@ package body utils_pkg is
 
     function get_amount_of_trailing_state(data: std_ulogic_vector; state: std_ulogic) return natural is begin
         return to_integer(resize(get_amount_of_trailing_state(data => data, state => state), to_bits(natural'high)));
+    end function;
+
+    function get_lowest_active_bit(data: std_ulogic_vector) return natural is begin
+        for i in data'low to data'high loop
+            if data(i) then
+                return i;
+            end if;
+        end loop;
+
+        return data'length; -- Return length if no '1' is found
+    end function;
+
+    function get_highest_active_bit(data: std_ulogic_vector) return natural is begin
+        for i in data'high to data'low loop
+            if data(i) then
+                return i;
+            end if;
+        end loop;
+
+        return data'length; -- Return length if no '1' is found
     end function;
 
     function is_one_state(data: std_ulogic_vector; state: std_ulogic) return boolean is

@@ -29,23 +29,32 @@ The utilities are designed to work with VHDL-2008 simulators and include support
 This repository includes the following VHDL utilities and components:
 
 ### Core VHDL Utilities (`utils_pkg.vhd`)
+
 - **Bit calculation functions**: `to_bits()` - Calculate minimum bits needed to represent a number
-- **Boolean conversion**: `??` operator - Convert boolean to std_ulogic  
+- **Boolean conversion**: `??` operator - Convert boolean to std_ulogic
 - **Vector operations**: `**` operator - Create UNRESOLVED_UNSIGNED vectors
 - **File operations**: `file_length_in_characters()` - Get file size in characters
 - **Signal analysis**: `get_amount_of_state()` - Count occurrences of specific states in vectors
+- **Trailing state counting**: `get_amount_of_trailing_state()` - Count trailing bits of a given value in a vector
+- **Lowest/highest active bit**: `get_lowest_active_bit()`, `get_highest_active_bit()` - Find the lowest/highest set bit in a vector
+- **One-hot/one-cold detection**: `is_one_hot()`, `is_one_cold()` - Check if a vector is one-hot or one-cold encoded
+- **Relative equality**: `is_relatively_equal()` - Compare two real numbers with tolerance
 
 ### Testbench Utilities (`tb_utils.vhd`)
-- **Clock generation**: 
+
+- **Clock generation**:
   - `generate_clock()` - Basic clock generation with frequency control
   - `generate_clock()` with reset - Clock generation with reset synchronization
   - `generate_derived_clock()` - Derived clock generation with division factors
+  - `generate_advanced_clock()` - Clock with phase, duty cycle, and enable control
+- **Integer vector to string**: `to_string()` - Convert integer vectors to string for debug output
 - **Reset patterns**: Predefined weight distributions for realistic reset scenarios
 - **Random signal generation**: 50/50 weight distributions for balanced testing
 
 ### Simulation Support
+
 - **VUnit integration** (`run_all_testbenches_lib.py`): Python library for automated testbench execution
-- **Xilinx library support**: Automatic glbl module handling for Xilinx simulations  
+- **Xilinx library support**: Automatic glbl module handling for Xilinx simulations
 - **Wave file automation** (`find_wave_file.do`): ModelSim script for automatic wave file loading
 
 ## Usage
@@ -54,9 +63,11 @@ To use these utilities in your VHDL projects:
 
 1. Include the relevant package files in your project
 2. Add the appropriate `use` statements in your VHDL files:
+
    ```vhdl
    library work;
    use work.utils_pkg.all;     -- For general utilities
    use work.tb_utils.all;      -- For testbench utilities
    ```
+
 3. For VUnit-based testing, use the provided Python library to automate simulation runs
