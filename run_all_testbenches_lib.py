@@ -99,13 +99,23 @@ def setup_vunit_environment(testbench_glob="**", gui_enabled=False, compile_only
     return vu
 
 
-def configure_compile_options(vu):
+def configure_compile_options(vu, use_xilinx_libs=False, use_intel_altera_libs=False):
     """
     Configure common compilation settings.
     """
 
     nvc_compilation_options = ["--relaxed"]
     vu.set_compile_option("nvc.a_flags", nvc_compilation_options)
+    
+    # Add library search paths for NVC when using vendor libraries
+    nvc_global_options = []
+    if use_xilinx_libs:
+        nvc_global_options += ["-L", "unisim", "-L", "unimacro", "-L", "unifast"]
+    if use_intel_altera_libs:
+        nvc_global_options += ["-L", "altera_mf"]
+    
+    if nvc_global_options:
+        vu.set_compile_option("nvc.global_flags", nvc_global_options)
 
 
 def configure_simulation_options(vu, timeout_ms=0.5, use_xilinx_libs=False, use_intel_altera_libs=False):
@@ -150,7 +160,8 @@ def main(path=".", tb_pattern="**", timeout_ms=0.5, gui=False, compile_only=Fals
     )
 
     lib = vu.add_library("vunit_library")
-    source_files = discover_hdl_files(path, excluded_list=excluded_list)
+    # Include VHDL files (NVC now supports Verilog but we focus on VHDL for our HDL core library)
+    source_files = discover_hdl_files(path, extensions=(".vhd", ".vhdl"), excluded_list=excluded_list)
     lib.add_source_files(source_files, allow_empty=True)
 
     # Add Xilinx glbl module if Xilinx libraries are enabled
@@ -169,7 +180,7 @@ def main(path=".", tb_pattern="**", timeout_ms=0.5, gui=False, compile_only=Fals
             print("   Example: setx XILINX_VIVADO \"C:\\\\Xilinx\\\\Vivado\\\\2023.2\"")
             print("   Or manually copy glbl.v to your project directory")
 
-    configure_compile_options(vu)
+    configure_compile_options(vu, use_xilinx_libs, use_intel_altera_libs)
     configure_simulation_options(vu, timeout_ms, use_xilinx_libs, use_intel_altera_libs)
 
     # Start simulation
