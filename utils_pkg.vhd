@@ -12,6 +12,61 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 package utils_pkg is
+    type frequency_t is range 0 to natural'high units
+        Hz;
+        kHz = 1000 Hz;
+        MHz = 1000 kHz;
+        GHz = 1000 MHz;
+    end units;
+
+    -------------------------------------------------------------
+    -- Function to convert a frequency to Hz
+    -- usage: to_real(1.0 kHz); -- returns 1000.0
+    -- usage: to_real(1.0 MHz); -- returns 1000000.0
+    -- usage: to_real(1.0 GHz); -- returns 1000000000.0
+    -------------------------------------------------------------
+    function to_real(frequency: frequency_t) return real;
+
+    -------------------------------------------------------------
+    -- Function to convert a time value to seconds
+    -- usage: to_real(1.0 fs); -- returns 1.0e
+    -- usage: to_real(1.0 ps); -- returns 1.0e-12
+    -- usage: to_real(1.0 ns); -- returns 1.0e
+    -- usage: to_real(1.0 us); -- returns 1.0e-6
+    -- usage: to_real(1.0 ms); -- returns 1.0e-3
+    -- usage: to_real(1.0 sec); -- returns 1.0
+    -- usage: to_real(1.0 min); -- returns 60.0
+    -- usage: to_real(1.0 hr); -- returns 3600.0
+    -------------------------------------------------------------
+    function to_real(time_value: time) return real;
+
+    -------------------------------------------------------------
+    -- Function to convert a frequency to a time value
+    -- usage: to_time(1.0 kHz); -- returns 1 ms
+    -- usage: to_time(1.0 MHz); -- returns 1 us
+    -- usage: to_time(1.0 GHz); -- returns 1 ns
+    -- usage: to_time(1.0 THz); -- returns 1 ps
+    -------------------------------------------------------------
+    function to_time(frequency: frequency_t) return time;
+
+    ------------------------------------------------------------
+    -- Function to convert a time value to a frequency
+    -- usage: to_frequency(1 ms); -- returns 1.0 kHz
+    -- usage: to_frequency(1 us); -- returns 1.0 MHz
+    -- usage: to_frequency(1 ns); -- returns 1.0 GHz
+    -- usage: to_frequency(1 ps); -- returns 1.0 THz
+    ------------------------------------------------------------
+    function to_frequency(time_value: time) return frequency_t;
+
+    ------------------------------------------------------------
+    -- Function to convert a time value to clock cycles
+    -- usage: to_clock_cycles(1 ms, 100 MHz); -- returns 100000
+    -- usage: to_clock_cycles(1 us, 100 MHz); -- returns 100
+    -- usage: to_clock_cycles(1 ns, 100 MHz); -- returns 100
+    -- usage: to_clock_cycles(1 ps, 100 MHz); -- returns 0
+    ------------------------------------------------------------
+    function to_clock_cycles(time_value: time; clock_frequency: frequency_t) return positive;
+
     ------------------------------------------------------------
     -- Function to convert a natural or real number to the number of bits required to represent it
     -- usage: to_bits(8); -- returns 4, as 8 can be represented in 4 bits (1000)
@@ -80,6 +135,69 @@ package utils_pkg is
 end package;
 
 package body utils_pkg is
+    function to_real(frequency: frequency_t) return real is begin
+        if (frequency < 1.0 kHz) then
+            return real(frequency / 1.0 Hz); -- Already in Hz
+        elsif (frequency < 1.0 MHz) then
+            return real(frequency / 1.0 kHz) * 1.0e3;
+        elsif (frequency < 1.0 GHz) then
+            return real(frequency / 1.0 MHz) * 1.0e6;
+        else
+            return real(frequency / 1.0 GHz) * 1.0e9;
+        end if;
+    end function;
+
+    function to_real(time_value: time) return real is begin
+        if (time_value < 1.0 ns) then
+            if (time_value < 1.0 ps) then
+                return real(time_value / 1 fs) * 1.0e-15;
+            else
+                return real(time_value / 1 ps) * 1.0e-12;
+            end if;
+        elsif (time_value < 1.0 us) then
+            return real(time_value / 1 ns) * 1.0e-9;
+        elsif (time_value < 1.0 ms) then
+            return real(time_value / 1 us) * 1.0e-6;
+        elsif (time_value < 1.0 sec) then
+            return real(time_value / 1 ms) * 1.0e-3;
+        elsif (time_value < 1.0 min) then
+            return real(time_value / 1 sec); -- Already in seconds
+        elsif (time_value < 1.0 hr) then
+            return real(time_value / 1 min) * 60.0;
+        else
+            return real(time_value / 1 hr) * 3600.0;
+        end if;
+    end function;
+
+    function to_time(frequency: frequency_t) return time is
+        variable frequency_value_hz: real;
+    begin
+        frequency_value_hz := to_real(frequency);
+        if (frequency_value_hz = 0.0) then
+            return 0 fs; -- Return zero time for zero frequency
+        end if;
+        return 1.0 / frequency_value_hz * 1.0 sec;
+    end function;
+
+    function to_frequency(time_value: time) return frequency_t is
+        variable time_value_sec: real;
+    begin
+        time_value_sec := to_real(time_value);
+        if (time_value_sec = 0.0) then
+            return 0 Hz; -- Return zero frequency for zero time
+        end if;
+        return 1.0 / time_value_sec * 1.0 Hz;
+    end function;
+
+    function to_clock_cycles(time_value: time; clock_frequency: frequency_t) return positive is
+        variable time_value_sec: real;
+        variable clock_frequency_hz: real;
+    begin
+        clock_frequency_hz := to_real(clock_frequency);
+        time_value_sec := to_real(time_value);
+        return positive(ceil(time_value_sec * clock_frequency_hz));
+    end function;
+
     function to_bits(x: real) return natural is begin
         return natural(ceil(log2(x)));
     end function;

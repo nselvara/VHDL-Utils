@@ -30,6 +30,11 @@ This repository includes the following VHDL utilities and components:
 
 ### Core VHDL Utilities (`utils_pkg.vhd`)
 
+- **Unit conversion functions**:
+  - `to_real()` - Convert frequency_t or time values to real numbers (Hz or seconds)
+  - `to_time()` - Convert frequency_t to time (period calculation)
+  - `to_frequency()` - Convert time to frequency_t
+  - `to_clock_cycles()` - Convert time duration to number of clock cycles at given frequency
 - **Bit calculation functions**: `to_bits()` - Calculate minimum bits needed to represent a number
 - **Boolean conversion**: `??` operator - Convert boolean to std_ulogic
 - **Vector operations**: `**` operator - Create UNRESOLVED_UNSIGNED vectors
